@@ -1,9 +1,9 @@
-type Store = {
+interface Store  {
   currentPage: number;
   feeds: NewsFeed[];
 }
 
-type News = {
+interface News  {
   id: number;
   time_ago: string;
   title: string;
@@ -12,17 +12,17 @@ type News = {
   content: string;
 }
 
-type NewsFeed = News & {
+interface NewsFeed extends News {
   comments_count: number;
   points: number;
   read?: boolean;
 }
 
-type NewsDetail = News & {
+interface NewsDetail extends News {
   comments: NewsComment[];
 }
 
-type NewsComment = News & {
+interface NewsComment extends News {
   comments: NewsComment[];
   level: number;
 }
@@ -35,11 +35,33 @@ const store: Store = {
   feeds: []
 };
 
-function getData<AjaxResponse>(url: string): AjaxResponse{
-  ajax.open('GET', url, false);
-  ajax.send();
+class Api {
+  url: string;
+  ajax: XMLHttpRequest;
 
-  return JSON.parse(ajax.response);
+  constructor(url: string) {
+    this.url = url;
+    this.ajax = new XMLHttpRequest();
+  }
+
+  getRequest<AjaxResponse>(): AjaxResponse {
+    this.ajax.open('GET', this.url, false);
+    this.ajax.send();
+
+    return JSON.parse(ajax.response);
+  }
+}
+
+class NewsFeedApi extends Api {
+  getData(): NewsFeed[]{
+    return this.getRequest<NewsFeed[]>();
+  }
+}
+
+class NewsDetailApi extends Api {
+  getData(): NewsDetail {
+    return this.getRequest<NewsDetail>();
+  }
 }
 
 function updateView(html: string): void {
